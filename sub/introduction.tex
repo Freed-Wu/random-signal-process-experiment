@@ -1,0 +1,73 @@
+\documentclass[../main]{subfiles}
+\begin{document}
+
+\chapter{引言}%
+\label{cha:introduction}
+
+\section{问题重述}%
+\label{sec:problem}
+
+仿真线性调频脉冲雷达的信号处理。设线性调频带宽为 10MHz，时宽为 200μs，占空
+比 10\%，雷达载频为 10GHz，输入噪声为高斯白噪声。目标模拟分单目标和双目标两种
+情况，目标回波输入信噪比可变（-40dB $\sim$ 10dB），目标速度可变（0 $\sim$
+1000m/s），目标距离可变（0 $\sim$ 10000m），相干处理时间不小于 100ms。
+
+程序要参数化可设。
+
+\begin{Exercise}
+  分析该雷达的不模糊距离和速度，距离和速度分辨率；
+\end{Exercise}
+
+\begin{Exercise}
+  仿真 LFM 信号单周期和周期自相关函数，说明第一旁瓣高度，4dB 输出脉冲宽度，以及
+  如何通过加窗来抑制 LFM 信号脉压旁瓣，列表说明不同窗函数抑制旁瓣时的旁瓣大小
+  和主瓣展宽的倍数；
+\end{Exercise}
+
+\begin{Exercise}
+  单目标时，
+  \begin{itemize}
+    \item 仿真给出雷达脉压后和 MTD（FFT 加窗和不加窗）后的输出图形，说明 FFT
+      加窗抑制频谱泄露效果；
+    \item 通过仿真说明脉压输出和 FFT 输出的 SNR、时宽和带宽，是否与理论分析吻
+      合；
+    \item 仿真说明脉压时多卜勒敏感现象和多卜勒容限及其性能损失（脉压主瓣高度
+      与多卜勒的曲线）。
+  \end{itemize}
+\end{Exercise}
+
+\begin{Exercise}
+  \begin{itemize}
+    \item 双目标时，仿真出大目标旁瓣盖掩盖小目标的情况；
+    \item 仿真出距离分辨和速度分辨的情况。
+  \end{itemize}
+\end{Exercise}
+
+\section{要求}%
+\label{sec:requirement}
+
+\begin{itemize}
+  \item 注意信号和噪声带宽要一致，给出信号频谱图和噪声的功率谱图来说明；
+  \item 白噪声加入必须采用 \emph{randn} 函数，注意控制回波的信噪比；噪声根据
+    信号带宽滤波，再计算噪声平均功率 $P_n$ ，计算复信号单周期发射期间的平均功
+    率，再根据输入信噪比计算出信号的外加幅度值 $A$ ；
+    \begin{align}
+      10\lg \frac{A^2P_s}{P_n} = & \mathrm{SNR}_\mathrm{i}\\
+      A = & \sqrt{10^{\frac{\mathrm{SNR}_\mathrm{i}}{10}}}\frac{P_n}{P_s}
+    \end{align}
+  \item 相位编码信号保证一个码元内有两个样点以上；
+  \item 通过数据计算分析脉压输出和 MTD 输出的信噪比，建议信号和噪声分开输入
+    来计算各级输出时的信号峰值功率和噪声的平均功率，然后给出各级的输出信噪比；
+  \item 讨论多卜勒容限时，不加噪声，画出脉压主瓣高度随多卜勒频率的变化曲线
+    ，必须是通过自动运行程序改变多卜勒频率来统计脉压主瓣高度的变化，并画出
+    曲线；
+  \item  计算输出信噪比时，考虑噪声高于旁瓣，即计算噪声平均功率时，不要变为计
+    算旁瓣平均功率，因此验证各级信噪比增益时，输入信噪比要低。也可根据输出信
+    噪比（13dB）和理论信处得益反推出建议的输入信噪比量级；
+  \item 大目标的大旁瓣掩盖小目标主瓣，要分距离维和速度维分开分析，注意具体的
+    仿真条件，可以不加噪声说明；
+  \item 分析雷达分辨能力时，注意具体的仿真条件，可以不加噪声说明；
+\end{itemize}
+
+\end{document}
+
