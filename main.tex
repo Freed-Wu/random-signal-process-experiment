@@ -16,10 +16,9 @@
 }
 \usepackage{nomencl}
 \makenomenclature%
-\usepackage{index}
-\makeindex
 \usepackage{minted}
 \usepackage{boxie}
+\usepackage{siunitx}
 \begin{document}
 
 \maketitle
@@ -34,11 +33,11 @@
 
 \mainmatter%
 \subfile{sub/introduction}
+\subfile{sub/simulate}
 
 \backmatter%
 \bibliography{bib/main}
 \subfile{sub/acknowledgement}
-\printindex
 
 \appendix
 \subfile{sub/code}

@@ -1,0 +1,357 @@
+\documentclass[../main]{subfiles}
+\begin{document}
+
+\chapter{仿真}%
+\label{cha:simulate}
+
+\section{发射信号}%
+\label{sec:emit}
+
+为了获取有确定信噪比的发射信号，我们要先获得噪声波形振幅的均值。根据假设%
+~\ref{it:noise}，噪声$n(t)$\nomenclature{$n(t)$}{噪声}分布见式~\ref{eq:noise}
+和图~\ref{fig:noise_pdf}。
+
+\begin{align}
+  \label{eq:noise}
+  n(t) \sim & N(0, 1)\\
+  n(t) \in & \mathbb{C}
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/noise_pdf}
+  \caption{噪声概率密度函数}%
+  \label{fig:noise_pdf}
+\end{figure}
+
+根据假设~\ref{it:hillbert}，发射的基带波形$s_0(t)$\nomenclature{$s_0(t)$}{发
+射的基带波形}见式~\ref{eq:baseband_wave}和图~\ref{fig:baseband_wave}。其中
+$\alpha$\nomenclature{$\alpha$}{角加频率}是角加频率，$k$\nomenclature{$k$}{角
+频率}是角频率，$\tau$\nomenclature{$\tau$}{时宽}是时宽，
+$B$\nomenclature{$B$}{带宽}是带宽，
+$T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复周期。
+
+\begin{align}
+  \label{eq:baseband_wave}
+  s_0(t) = & \exp{\jmath\frac{\alpha t^2}{2}} \rect{t\%T / \tau +
+  \frac{1}{2}}\\
+  \alpha = & 2\pi k\\
+  k = & \frac{B}{\tau}
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/baseband_wave}
+  \caption{基带波形}%
+  \label{fig:baseband_wave}
+\end{figure}
+
+根据假设~\ref{it:doppler}和假设~\ref{it:time_switch}，有式~\ref{eq:doppler}。
+其中
+
+\begin{align}
+  \label{eq:doppler}
+  \max{R} = & \frac{cT_\mathrm{r}}{2}\\
+  \max{v} = & \frac{\lambda f_\mathrm{r}\varparallel 2c}{2}\\
+  \min{R} = & \frac{c\tau}{2}\\
+  \min{v} = & \frac{\lambda f_d\varparallel 2c}{2}\\
+  f_\mathrm{r} = & \frac{1}{T_\mathrm{r}}\\
+  \lambda = & \frac{c}{f_\mathrm{c}}
+\end{align}
+
+发射的基带波形通带见图~\ref{fig:baseband_wave_band}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/baseband_wave_band}
+  \caption{基带波形通带}%
+  \label{fig:baseband_wave_band}
+\end{figure}
+
+发射的基带频谱$S_(f)$\nomenclature{$S_(f)$}{发射的基带频谱}见图%
+~\ref{fig:baseband_spectrum}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/baseband_spectrum}
+  \caption{基带频谱}%
+  \label{fig:baseband_spectrum}
+\end{figure}
+
+\begin{Answer}[ref = ex:1]
+  不模糊距离为，不模糊速度为，距离分辨力为，速度分辨力为。
+\end{Answer}
+
+\section{自相关函数}%
+\label{sec:self_coherent}
+
+根据式\ref{eq:mf_wave}，匹配滤波器冲激响应波形$h(t)$\nomenclature{$h(t)$}{匹
+配滤波器冲激响应}见图~\ref{fig:mf_wave}。
+
+\begin{align}
+  \label{eq:mf_wave}
+  h(t) = s_0^*(\frac{T + \tau}{2} - t)
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mf_wave}
+  \caption{匹配滤波器冲激响应波形}%
+  \label{fig:mf_wave}
+\end{figure}
+
+根据式\ref{eq:self_coherent_wave}，发射的基带信号的脉压波形与其自相关函数相似
+。发射的基带信号的脉压波形见图~\ref{fig:self_coherent_wave}。
+
+\begin{align}
+  \label{eq:self_coherent_wave}
+  R_s(t) = & s_0(t) * s_0^*(-t)\\
+  s_0^0(t) = & s_0(t) * s^0(t)
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_wave}
+  \caption{发射的基带信号的脉压波形}%
+  \label{fig:self_coherent_wave}
+\end{figure}
+
+发射的基带信号的脉压波形通带见图~\ref{fig:self_coherent_wave}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_band}
+  \caption{发射的基带信号的脉压波形通带}%
+  \label{fig:self_coherent_band}
+\end{figure}
+
+发射的基带信号的脉压波形通带波特图见图~\ref{fig:self_coherent_wave}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_band_db}
+  \caption{发射的基带信号的脉压波形通带波特图}%
+  \label{fig:self_coherent_band_db}
+\end{figure}
+
+发射的基带信号的脉压波形通带局部放大波特图见图%
+~\ref{fig:self_coherent_band_enlargement_db}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_band_enlargement_db}
+  \caption{发射的基带信号的脉压波形通带局部放大波特图}%
+  \label{fig:self_coherent_band_enlargement_db}
+\end{figure}
+
+发射的基带信号的脉压波形高采样率通带局部放大波特图见图%
+~\ref{fig:self_coherent_hf_band_enlargement_db}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_band_enlargement_hf_db}
+  \caption{发射的基带信号的脉压波形高采样率通带局部放大波特图}%
+  \label{fig:self_coherent_hf_band_enlargement_db}
+\end{figure}
+
+发射的基带信号的脉压波形加窗高采样率通带局部放大波特图见图%
+~\ref{fig:self_coherent_window_hf_enlargement_db}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/self_coherent_window_hf_enlargement_db}
+  \caption{自相关函数加窗高采样率局部放大波特图}%
+  \label{fig:self_coherent_window_hf_enlargement_db}
+\end{figure}
+
+\begin{Answer}[ref = ex:2]
+  第一旁瓣高度为，\SI{4}{\dB}输出脉冲宽度为，不同窗函数抑制旁瓣时的旁瓣大小和
+  主瓣展宽的倍数见表~\ref{tab:window}。
+\end{Answer}
+
+\begin{table}[htbp]
+  \centering
+  \caption{不同窗函数抑制旁瓣时的旁瓣大小和主瓣展宽的倍数}%
+  \label{tab:window}
+  \csvautobooktabular{tab/window.csv}
+\end{table}
+
+\section{单目标动目标检测}%
+\label{sec:single_mtd}
+
+根据式~\ref{eq:echo_wave_wave}，回波波形$s_1(t)$\nomenclature{$s_1(t)$}{回波
+波形}见图~\ref{fig:echo_wave_wave}。
+
+\begin{align}
+  s_1(t) = s_0(t)\exp{\jmath 2\pi f_\mathrm{d}t}
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/echo_wave_wave}
+  \caption{回波波形}%
+  \label{fig:echo_wave_wave}
+\end{figure}
+
+回波频谱$S_1(t)$\nomenclature{$S_1(f)$}{回波频谱}见图%
+~\ref{fig:echo_wave_spectrum}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/echo_wave_spectrum}
+  \caption{回波频谱}%
+  \label{fig:echo_wave_spectrum}
+\end{figure}
+
+脉压波形$s_1^0(t)$\nomenclature{脉压波形}{脉压波形}见图%
+~\ref{fig:pulse_compression_wave}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/pulse_compression_wave}
+  \caption{脉压波形}%
+  \label{fig:pulse_compression_wave}
+\end{figure}
+
+多个回波波形$s_1(t)$见图~\ref{fig:echo_wave_wave2}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/echo_wave_wave2}
+  \caption{多个回波波形}%
+  \label{fig:echo_wave_wave2}
+\end{figure}
+
+动目标检测波形$s_1(t, n)$见图~\ref{fig:mtd_wave}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mtd_wave}
+  \caption{动目标检测波形}%
+  \label{fig:mtd_wave}
+\end{figure}
+
+动目标检测波形慢时间视图$\max\limits_t{s_1(t, n)}$见图%
+~\ref{fig:mtd_wave_slow_view}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mtd_wave_slow_view}
+  \caption{动目标检测波形慢时间视图}%
+  \label{fig:mtd_wave_slow_view}
+\end{figure}
+
+动目标检测慢时间频谱$S_1(t, F)$见图~\ref{fig:mtd_slow_spectrum}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mtd_slow_spectrum}
+  \caption{动目标检测慢时间频谱}%
+  \label{fig:mtd_slow_spectrum}
+\end{figure}
+
+动目标检测慢时间频谱慢时间视图$\max\limits_tS_1(t, F)$见图%
+~\ref{fig:mtd_slow_spectrum}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mtd_slow_spectrum_slow_view}
+  \caption{动目标检测慢时间频谱慢时间视图}%
+  \label{fig:mtd_slow_spectrum_slow_view}
+\end{figure}
+
+动目标检测慢时间频谱慢时间视图波特图$\max\limits_FS_1(t, F)$见图%
+~\ref{fig:mtd_slow_spectrum}。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/mtd_slow_spectrum_slow_view_db}
+  \caption{动目标检测慢时间频谱慢时间视图波特图}%
+  \label{fig:mtd_slow_spectrum_slow_view_db}
+\end{figure}
+
+\begin{Answer}[ref = ex:3]
+  脉冲压缩信噪比增益为， FFT 信噪比增益为，时宽为，带宽为，多卜勒敏感现象及其
+  性能损失见表~\ref{tab:doppler}
+\end{Answer}
+
+\section{双目标动目标检测}%
+\label{sec:double_mtd}
+
+\begin{Answer}[ref = ex:4]
+  \begin{itemize}
+    \item 大目标旁瓣盖掩盖小目标见图~\ref{fig:amplitude_distinguish_db}；
+    \item 距离分辨见图~\ref{fig:distance_distinguish}；
+    \item 速度分辨见图~\ref{fig:velocity_distinguish}。
+  \end{itemize}
+\end{Answer}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/power_distinguish}
+  \caption{大目标旁瓣盖掩盖小目标}%
+  \label{fig:amplitude_distinguish_db}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/distance_distinguish}
+  \caption{距离分辨}%
+  \label{fig:distance_distinguish}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[
+    width = 0.8\linewidth,
+  ]{fig/velocity_distinguish}
+  \caption{速度分辨}%
+  \label{fig:velocity_distinguish}
+\end{figure}
+
+\end{document}
+
