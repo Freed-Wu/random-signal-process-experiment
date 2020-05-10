@@ -1,30 +1,34 @@
-"""
+#=
 This program is used to simulate LFMCW.
-,-.
-/ \  `.  __..-,O
-:   \ --''_..-'.'
-|    . .-' `. '.
-:     .     .`.'
-\     `.  /  ..
-\      `.   ' .
-`,       `.   \
-,|,`.        `-.\
-'.||  ``-...__..-`
-|  |
-|__|
-/||\
-//||\\
-// || \\
-__//__||__\\__
+      ,-.
+     / \  `.  __..-,O
+    :   \ --''_..-'.'
+    |    . .-' `. '.
+    :     .     .`.'
+     \     `.  /  ..
+      \      `.   ' .
+       `,       `.   \
+      ,|,`.        `-.\
+     '.||  ``-...__..-`
+      |  |
+      |__|
+      /||\
+     //||\\
+    // || \\
+ __//__||__\\__
 '--------------'
-"""
+=#
 # import libraries
 using Plots # data visualization
 using FFTW # FFT
 using DSP # convolution, window, filter
 using Statistics # mean
-using Distributions # probibility
 using LaTeXStrings # image output
+using CSV # table output
+using DataFrames # table create
+using Shell # shell inject
+Shell.run("mkdir tab") # directory to save tables
+Shell.run("mkdir fig") # directory to save figures
 
 # input
 B = 10e6 # band width
@@ -43,70 +47,87 @@ k = B / τ # LFM accelarative frequence
 α = 2π * k # LFM accelarative angle
 f₀ = 2B # sample frequence
 t₀ = 1 / f₀ # sample time
+"noise wave"
 noise = ts -> randn(ComplexF64, length(ts))
 histogram(
 	xlabel = L"u/\mathrm{V}",
 	ylabel = L"N(u)",
-	label = [L"\mathrm{Re}(u_n)" L"\mathrm{Im}(u_n)"],
+	label = [L"\mathrm{Re}n" L"\mathrm{Im}n"],
 	[
 		real(noise(0:t₀:T)),
 		imag(noise(0:t₀:T))
 	]
 )
 savefig("fig/noise_pdf.pdf")
-count(x -> abs(x) < 3 / √2, real(noise(0:t₀:T))) /
-	length(0:t₀:T)
-cdf(Normal(), 3) - cdf(Normal(), -3)
-n_lpf(xs) = Int64(round(length(xs) / 4))
-lpf_f(xs) = [zeros(n_lpf(xs)); xs[n_lpf(xs) + 1:3n_lpf(xs)];
-	zeros(n_lpf(xs))]
-lpf(xs) = ifft(ifftshift(lpf_f(fftshift(fft(xs)))))
-A = db2amp(dBSNR) * rms(lpf(noise(0:t₀:T)))
-@. s₀(t) = A * exp(im * α * (t - T / 2)^2 / 2) * (abs(t % T - T / 2) < τ / 2)
-# signal
+"get half of point number of low pass"
+n_lp(xs) = Int64(round(length(xs) / 4))
+"low pass, in fact, DSP exist LowPass function, but I don't know usage"
+lp(xs) = [zeros(n_lp(xs)); xs[range(n_lp(xs) + 1, length = length(xs) - 2n_lp(xs))]; zeros(n_lp(xs))]
+"fft in fast time"
+fft1(xs) = fftshift(fft(xs, 1), 1)
+"ifft in fast time"
+ifft1(xs) = ifft(ifftshift(xs, 1), 1)
+"low pass filter"
+lpf(xs) = ifft1(lp(fft1(xs)))
+A₀ = db2amp(dBSNR) * rms(lpf(noise(0:t₀:T))) # signal amplitude
+"signal wave"
+@. s₀(t) = A₀ * exp(im * α * (t - T / 2)^2 / 2) * (abs(t % T - T / 2) < τ / 2)
 plot(
 	xlabel = L"t/\mathrm{s}",
-	ylabel = L"\mathrm{Re}u_{s_0}(t)/\mathrm{V}",
-	label = L"\mathrm{Re}u_{s_0}(t)",
+	ylabel = L"\mathrm{Re}s_0(t)/\mathrm{V}",
+	label = [L"\mathrm{Re}s_0(t)" L"|s_0(t)|"],
 	0:t₀:T,
-	real(s₀(0:t₀:T))
+	[
+		real(s₀(0:t₀:T)),
+		abs.(s₀(0:t₀:T))
+	]
 )
 savefig("fig/baseband_wave.pdf")
+"get band of signal"
+band(xs, a::Float64 = 1 / 1000) = findfirst(abs.(xs) .> a * maximum(abs.(xs))):findlast(abs.(xs) .> a * maximum(abs.(xs)))
 plot(
 	xlabel = L"t/\mathrm{s}",
-	ylabel = L"\mathrm{Re}u_{s_0}(t)/\mathrm{V}",
-	label = L"\mathrm{Re}u_{s_0}(t)",
-	(T - τ) / 2:t₀:(T + τ) / 2,
-	real(s₀((T - τ) / 2:t₀:(T + τ) / 2))
+	ylabel = L"u(t)/\mathrm{V}",
+	label = [L"\mathrm{Re}s_0(t)" L"|s_0(t)|"],
+	(0:t₀:T)[band(s₀(0:t₀:T))],
+	[
+		real(s₀(0:t₀:T)[band(s₀(0:t₀:T))]),
+		abs.(s₀(0:t₀:T)[band(s₀(0:t₀:T))])
+	]
 )
 savefig("fig/baseband_wave_band.pdf")
 plot(
 	xlabel = L"f/\mathrm{Hz}",
 	ylabel = L"U/(\mathrm{V}\times\mathrm{s})",
-	label = [L"U_{\mathrm{Re}s_0}(f)" L"U_{s_0}(f)"],
+	label = [L"\mathrm{Cs}S_0(f)" L"S_0(f)"],
 	range(-f₀, stop = f₀, length = length(0:t₀:T)),
 	[
-		abs.(fftshift(fft(real(s₀(0:t₀:T))))),
-		abs.(fftshift(fft(s₀(0:t₀:T))))
+		abs.(fft1(real(s₀(0:t₀:T)))),
+		abs.(fft1(s₀(0:t₀:T)))
 	]
 )
 savefig("fig/baseband_spectrum.pdf")
 
 # self coherent
-@. s⁰(t) = conj(s₀((T + τ) / 2 - t)) # MF response
+"match filter response"
+@. s⁰(t) = conj(s₀((T + τ) / 2 - t))
 plot(
 	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u_{s^0}(t)/\mathrm{V}",
-	label = L"u_{s^0}(t)",
+	ylabel = L"u(t)/\mathrm{V}",
+	label = [L"\mathrm{Re}s^0(t)" L"|s^0(t)|"],
 	0:t₀:T,
-	real(s⁰(0:t₀:T))
+	[
+		real(s⁰(0:t₀:T)),
+		abs.(s⁰(0:t₀:T)),
+	]
 )
 savefig("fig/mf_wave.pdf")
+"match filter"
 mf(xs, t = t₀) = conv(s⁰(0:t:T), xs)[1:length(xs)]
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
+	label = [L"\mathrm{Re}s_0^0(t)" L"|s_0^0(t)|"],
 	0:t₀:T,
 	[
 		real(mf(s₀(0:t₀:T))),
@@ -114,38 +135,36 @@ plot(
 	]
 )
 savefig("fig/self_coherent_wave.pdf")
-feature(xs) = findfirst(round.(abs.(xs)) .> 0):findlast(round.(abs.(xs)) .> 0)
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
-	(0:t₀:T)[feature(mf(s₀(0:t₀:T)))],
+	label = [L"\mathrm{Re}s_0^0(t)" L"|s_0^0(t)|"],
+	(0:t₀:T)[band(mf(s₀(0:t₀:T)), 1 / 1000)],
 	[
-		real(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)))],
-		abs.(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)))]
+		real(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 1000)],
+		abs.(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 1000)]
 	]
 )
 savefig("fig/self_coherent_band.pdf")
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{dBV}",
-	label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
-	(0:t₀:T)[feature(mf(s₀(0:t₀:T)))],
+	label = [L"\mathrm{Re}s_0^0(t)" L"|s_0^0(t)|"],
+	(0:t₀:T)[band(mf(s₀(0:t₀:T)), 1 / 1000)],
 	[
-		amp2db.(abs.(real(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)))])),
-		amp2db.(abs.(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)))])
+		amp2db.(abs.(real(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 1000)])),
+		amp2db.(abs.(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 1000)])
 	]
 )
 savefig("fig/self_coherent_db.pdf")
-feature(xs, n) = feature(xs)[Int64.(round.((length(feature(xs)) + 1) / 2 - n)): Int64.(round.((length(feature(xs)) + 1) / 2 + n))]
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{dBV}",
-	label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
-	(0:t₀:T)[feature(mf(s₀(0:t₀:T)),10)],
+	label = [L"\mathrm{Re}s_0^0(t)" L"|s_0^0(t)|"],
+	(0:t₀:T)[band(mf(s₀(0:t₀:T)), 1 / 20)],
 	[
-		amp2db.(abs.(real(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)),10)])),
-		amp2db.(abs.(mf(s₀(0:t₀:T)))[feature(mf(s₀(0:t₀:T)),10)])
+		amp2db.(abs.(real(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 20)])),
+		amp2db.(abs.(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 20)])
 	]
 )
 savefig("fig/self_coherent_enlargement_db.pdf")
@@ -154,36 +173,79 @@ t⁰ = 1 / f⁰
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{dBV}",
-	label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
-	(0:t⁰:T)[feature(t⁰,100)],
+	label = [L"\mathrm{Re}s_0^0(t)" L"|s_0^0(t)|"],
+	(0:t⁰:T)[band(mf(s₀(0:t⁰:T), t⁰), 1 / 20)],
 	[
-		amp2db.(abs.(real(mf(s₀(0:t⁰:T), t⁰))[feature(t⁰,100)])),
-		amp2db.(abs.(mf(s₀(0:t⁰:T), t⁰))[feature(t⁰,100)])
+		amp2db.(abs.(real(mf(s₀(0:t⁰:T), t⁰))[band(mf(s₀(0:t⁰:T), t⁰), 1 / 20)])),
+		amp2db.(abs.(mf(s₀(0:t⁰:T), t⁰))[band(mf(s₀(0:t⁰:T), t⁰), 1 / 20)])
 	]
 )
 savefig("fig/self_coherent_band_hf_enlargement_db.pdf")
-mf_feature(xs, window = rect) = abs.(mf(xs, t⁰)[feature(t⁰)]) .* window(length(feature(t⁰)))
+default_windows = [rect, cosine, hanning, hamming, lanczos, triang, bartlett, blackman]
+default_windows_label = ["rect" "cosine" "hanning" "hamming" "lanczos" "triang" "bartlett" "blackman"]
+"add window for 1 element function"
 function compare_window(
-			process,
-			xs,
-			ts,
-			windows = [rect, cosine, hanning, hamming, lanczos,
-				triang, bartlett, blackman],
-			)
-	curves = []
+		xs,
+		process = x -> x,
+		windows = default_windows
+		)
+	ys = []
 	for window in windows
-		push!(curves, amp2db.(process(xs, window)))
+		push!(ys, process(xs .* window(length(xs))))
 	end
-	plot(
-		xlabel = L"t/\mathrm{s}",
-		ylabel = L"u(t)/\mathrm{dBV}",
-		# label = [L"\mathrm{Re}u_{s_0^0}(t)" L"|u_{s_0^0}(t)|"],
-		ts,
-		curves
-	)
-	savefig("fig/self_coherent_window_hf_enlargement_db.pdf")
+	ys
 end
-compare_window(mf_feature, s₀(0:t⁰:T), (0:t⁰:T)[feature(t⁰)])
+mf_windows = compare_window(abs.(mf(s₀(0:t⁰:T), t⁰)[band(mf(s₀(0:t⁰:T), t⁰), 1 / 20)]), x -> amp2db.(abs.(x)))
+plot(
+	xlabel = L"t/\mathrm{s}",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = default_windows_label,
+	mf_windows
+)
+savefig("fig/self_coherent_window_band_hf_enlargement_db.pdf")
+mf_fft_windows = compare_window(abs.(mf(s₀(0:t⁰:T), t⁰)), x -> amp2db.(abs.(fft1(x))))
+plot(
+	xlabel = L"f/\mathrm{Hz}",
+	ylabel = L"u(t)/\mathrm{dBVs}",
+	label = default_windows_label,
+	range(-f⁰ / 2, stop = f⁰ / 2, length = length(mf_fft_windows[1])),
+	mf_fft_windows
+)
+savefig("fig/self_coherent_window_fft_hf_enlargement_db.pdf")
+"get index of local minimum"
+arglocalmin(xs) = findall(diff(sign.(diff(xs))) .> 0) .+ 1
+"get index of main lobe"
+function main_lobe(xs)
+	ys = arglocalmin(xs)
+	zs = argmax(xs)
+	posts = ys .>= zs
+	pres = ys .<= zs
+	ys[findlast(pres)]:ys[findfirst(posts)]
+end
+main_lobe(xs, L) = findfirst(abs.(xs[main_lobe(xs)]) .> maximum(abs.(xs[main_lobe(xs)])) - L):findlast(abs.(xs[main_lobe(xs)]) .> maximum(abs.(xs[main_lobe(xs)])) - L)
+"get width of main lobe"
+main_lobe_width(xs) = length(main_lobe(xs))
+main_lobe_width(xs, L) = length(main_lobe(xs, L))
+"get index of side lobe"
+function arg_side_lobe(xs)
+	ys = copy(xs)
+	ys[main_lobe(ys)] .= minimum(xs)
+	argmax(ys)
+end
+"get height of side lobe"
+side_lobe_height(xs) = xs[arg_side_lobe(xs)]
+mf_fft_windows_main_lobe = main_lobe_width.(mf_fft_windows) ./ length.(mf_fft_windows) .* f⁰
+Shell.run("touch tab/self_coherent_window.csv")
+CSV.write(
+	"tab/self_coherent_window.csv",
+	DataFrame(
+		窗函数 = default_windows_label,
+		输出脉冲4dB宽度（s） = main_lobe_width.(mf_windows, 4) .* t⁰,
+		旁瓣高度（dBVs） = side_lobe_height.(mf_fft_windows),
+		主瓣宽度(Hz) = mf_fft_windows_main_lobe,
+		主瓣宽度展开倍数 = mf_fft_windows_main_lobe ./ mf_fft_windows_main_lobe[1]
+	)
+)
 
 # single_mtd
 λ = c / f
@@ -192,70 +254,63 @@ prf = 1 / T
 f_d = prf / N
 t_d = 1 / f_d
 t2r(t) = c * t / 2
-f2v(f) = -1 / 2(1 / 2c + 1 / λ * f)
+f2v(f) = -1 / 2(1 / 2c + 1 / (λ * f))
 r2t(R) = 2 * R / c
 v2f(v) = -2 * v / λ * c / (c - v)
 Δv = f2v(-f_d)
 ΔR = t2r(1 / B)
 v₂ = v₁ + Δv
 R₂ = R₁ + ΔR
-@. echo_wave(R = 0, v = 0) = t -> s₀(t - r2t(R)) *
-	exp( im * 2π * v2f(v) * t)
+Shell.run("touch tab/parameter.csv")
+CSV.write(
+	"tab/parameter.csv",
+	DataFrame(
+		物理量 = ["不模糊距离", "不模糊速度", "距离分辩率", "速度分辩率"],
+		数值 = abs.([t2r(T), f2v(prf), ΔR, Δv])
+	)
+)
+"echo wave about distance and vector"
+@. echo_wave(R = 0, v = 0) = t -> s₀(t - r2t(R)) * exp( im * 2π * v2f(v) * t)
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"\mathrm{Re}u_n(t)" L"\mathrm{Re}u_{s_1}(t)"],
-	0:t₀:T,
+	label = [L"\mathrm{Re}n(t)" L"\mathrm{Re}s_1(t)"],
+	t₀:t₀:T,
 	[
-		real.(lpf(noise(0:t₀:T))),
-		real.(echo_wave(R₁, v₁)(0:t₀:T))
+		real.(lpf(noise(t₀:t₀:T))),
+		real.(echo_wave(R₁, v₁)(t₀:t₀:T))
 	]
 )
-savefig("fig/echo_wave_wave.pdf")
+savefig("fig/echo_wave.pdf")
 plot(
 	xlabel = L"f/\mathrm{Hz}",
 	ylabel = L"U(f)/(\mathrm{V}\times\mathrm{s})",
-	label = [L"|U_n(f)|" L"|U_{s_1}(f)|"],
-	range(-f₀, stop = f₀, length = length(0:t₀:T)),
+	label = [L"|N(f)|" L"|S_1(f)|"],
+	range(-f₀, stop = f₀, length = length(t₀:t₀:T)),
 	[
-		abs.(lpf_f(fftshift(fft(noise(0:t₀:T))))),
-		abs.(fftshift(fft(echo_wave(R₁, v₁)(0:t₀:T))))
+		abs.(fft1(lpf(noise(t₀:t₀:T)))),
+		abs.(fft1(echo_wave(R₁, v₁)(t₀:t₀:T)))
 	]
 )
-savefig("fig/echo_wave_spectrum.pdf")
+savefig("fig/echo_spectrum.pdf")
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
-	0:t₀:T,
+	label = [L"|n^0(t)|" L"|s_1^0(t)|"],
+	t₀:t₀:T,
 	[
-		abs.(mf(lpf(noise(0:t₀:T)))),
-		abs.(mf(echo_wave(R₁, v₁)(0:t₀:T)))
+		abs.(mf(lpf(noise(t₀:t₀:T)))),
+		abs.(mf(echo_wave(R₁, v₁)(t₀:t₀:T)))
 	]
 )
 savefig("fig/pulse_compression_wave.pdf")
-snr(ss, ns) = maximum(abs2.(ss)) / mean(abs2.(ns))
-snr(mf(echo_wave(R₁, v₁)(0:t₀:T)), mf(lpf(noise(0:t₀:T))))
-plot(
-	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
-	0:t₀:2T,
-	[
-		abs.(mf(lpf(noise(0:t₀:2T)))),
-		abs.(mf(echo_wave(R₁, v₁)(0:t₀:2T)))
-	]
-)
-savefig("fig/echo_wave_wave2.pdf")
+"distance door rearrange"
 rearrange(xs) = reshape(xs, Int64(round(length(xs) / N)), N)
-rearrange(xs, window, t = t₀) = rearrange(xs)[feature(t), :] .* repeat(window(length(feature(t))), 1, N)
-rearrange(echo_wave(R₁, v₁)(t₀:t₀:N * T))[Int64(round(r2t(R₁) / t₀)) .+ feature(t₀), :]
-echo_wave(R₁, v₁)(t₀:t₀:N * T)[Int64(round(r2t(R₁) / t₀)) .+ feature(t₀)]
 surface(
-	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	zlabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
+	xlabel = L"n",
+	ylabel = L"t/\mathrm{s}",
+	zlabel = L"u(t, n)/\mathrm{V}",
+	label = [L"|n^0(t, n)|" L"|s_1^0(t, n)|"],
 	1:N,
 	t₀:t₀:T,
 	[
@@ -264,80 +319,176 @@ surface(
 	]
 )
 savefig("fig/mtd_wave.pdf")
-plot(
-	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
-	1:N,
-	[
-		maximum(abs.(rearrange(mf(noise(t₀:t₀:N * T)))), dims = 1)[1, :],
-		maximum(abs.(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))), dims = 1)[1, :]
-	]
-)
-savefig("fig/mtd_wave_slow_view.pdf")
-mtd(xs, window) = fftshift(fft(rearrange(mf(xs), window), 2), 2)
+"fft in slow time"
+fft2(xs) = fftshift(fft(xs, 2), 2)
 surface(
-	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	zlabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
+	xlabel = L"f/\mathrm{Hz}",
+	ylabel = L"t/\mathrm{s}",
+	zlabel = L"u(t, n)/\mathrm{V}",
+	label = [L"|n^0(t)|" L"|s_1^0(t)|"],
 	range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d),
 	t₀:t₀:T,
 	[
-		abs.(mtd(lpf(noise(t₀:t₀:N * T)))),
-		abs.(mtd(echo_wave(R₁, v₁)(t₀:t₀:N * T)))
+		abs.(fft2(rearrange(mf(lpf(noise(t₀:t₀:N * T)))))),
+		abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))))
 	]
 )
 savefig("fig/mtd_slow_spectrum.pdf")
-mtd_f(xs, window) = maximum(abs.(mtd(xs, window)), dims = 1)[1, :]
-mtd_t(xs, window) = maximum(abs.(mtd(xs, window)), dims = 2)[:, 1]
+"view in slow time"
+view1(xs) = maximum(xs, dims = 1)[1, :]
 plot(
-	xlabel = L"t/\mathrm{s}",
+	xlabel = L"f/\mathrm{Hz}",
 	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
+	label = [L"|n^0(t)|" L"|s_1^0(t)|"],
 	range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d),
 	[
-		mtd_f(lpf(noise(t₀:t₀:N * T))),
-		mtd_f(echo_wave(R₁, v₁)(t₀:t₀:N * T))
+		view1(abs.(fft2(rearrange(mf(lpf(noise(t₀:t₀:N * T))))))),
+		view1(abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T))))))
 	]
 )
 savefig("fig/mtd_slow_spectrum_slow_view.pdf")
 plot(
-	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	label = [L"|u_n^0(t)|" L"|u_{s_1}^0(t)|"],
+	xlabel = L"f/\mathrm{Hz}",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = [L"|n^0(t)|" L"|s_1^0(t)|"],
 	range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d),
 	[
-		amp2db.(mtd_f(lpf(noise(t₀:t₀:N * T)))),
-		amp2db.(mtd_f(echo_wave(R₁, v₁)(t₀:t₀:N * T)))
+		amp2db.(view1(abs.(fft2(rearrange(mf(lpf(noise(t₀:t₀:N * T)))))))),
+		amp2db.(view1(abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))))))
 	]
 )
 savefig("fig/mtd_slow_spectrum_slow_view_db.pdf")
-compare_window(mtd_f, echo_wave(R₁, v₁)(t₀:t₀:N * T), range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d))
-compare_window(mtd_t, echo_wave(R₁, v₁)(t₀:t₀:N * T), t₀:t₀:T, [rect, triang])
-snr(mtd(echo_wave(R₁, v₁)(t₀:t₀:N * T)), mtd(lpf(noise(t₀:t₀:N * T))))
-get_v(xs) = f2v((argmax(mtd_f(xs)) - N / 2) * f_d)
-get_r(xs) = t2r(argmax(xs) * t₀ - (T + τ) / 2)
-bandwidth_ratio(xs) = sum(xs .> maximum(xs) / √2)
-bandwidth_ratio(mtd_f(echo_wave(R₁, v₁)(t₀:t₀:N * T))) * f_d / 2
-bandwidth_ratio(abs.(echo_wave(R₁, v₁)(t₀:t₀:N * T))) * t₀
+"distance door rearrange, but row and columne swap"
+rearrange2(xs) = transpose(reshape(xs, N, Int64(round(length(xs) / N))))
+"add window for 2 element function in dim 2"
+function compare_window2(
+		xs,
+		process = x -> x,
+		windows = default_windows
+		)
+	ys = []
+	for window in windows
+		push!(ys, process(xs .* rearrange2(repeat(window(size(xs)[2]), size(xs)[1]))))
+	end
+	ys
+end
+plot(
+	xlabel = L"f/\mathrm{Hz}",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = default_windows_label,
+	range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d),
+	compare_window2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T))), x ->  amp2db.(view1(abs.(fft2(x)))))
+)
+savefig("fig/mtd_window_slow_spectrum_slow_view_db.pdf")
+"the SNR gain"
+snr(ss, ns) = maximum(abs2.(ss)) / mean(abs2.(ns))
+snr_pulse_compression = snr(mf(echo_wave(R₁, v₁)(0:t₀:T)), mf(lpf(noise(0:t₀:T))))
+snr_fft2 = snr(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))), fft2(rearrange(mf(lpf(noise(t₀:t₀:N * T)))))) / snr_pulse_compression
+"bandwidth point number"
+bandwidth_n(xs, a = 1 / 1000) = length(band(xs, a))
+mf_bandwidth = bandwidth_n(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 10000) * t₀
+fft_bandwidth = bandwidth_n(view1(abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))))), 1 / √2) * f_d / 2
+theorem = [B * τ, N, 2τ, f_d / 2]
+measure = [snr_pulse_compression, snr_fft2, mf_bandwidth, fft_bandwidth]
+"relative error"
+@. err(x, y) = abs(x - y) / y
+Shell.run("touch tab/measure.csv")
+CSV.write(
+	"tab/measure.csv",
+	DataFrame(
+		物理量 = ["脉冲压缩增益", "傅立叶变换增益", "脉冲压缩时宽", "傅立叶变换带宽"],
+		理论值 = theorem,
+		测量值 = measure,
+		相对误差 = err(theorem, measure)
+	)
+)
+"compare sensitivity of a parameter, xs is the range of parameter"
+function compare_sensitivity(f, xs, process, postprocess = Float64)
+	ys = []
+	for x in xs
+		ys = [ys; process(f(x))]
+	end
+	zs = postprocess.(reshape(ys, Int64(round(length(ys) / length(xs))), Int64(round(length(xs)))))
+end
+surface(
+	xlabel = L"v/(\mathrm{m}/\mathrm{s})",
+	ylabel = L"t/\mathrm{s}",
+	zlabel = L"u(t, v)/\mathrm{dBV}",
+	label = ["s(t, v)"],
+	0:100:1000,
+	(t₀:t₀:T)[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)],
+	compare_sensitivity(v -> mf(echo_wave(R₁, v)(t₀:t₀:T))[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)], 0:100:1000, x -> amp2db.(abs.(x)))
+)
+savefig("fig/pulse_compression_wave_velocity_db.pdf")
+plot(
+	xlabel = L"t/\mathrm{s}",
+	ylabel = L"u(t, v)/\mathrm{dBV}",
+	label = hcat(0:100:1000 ...),
+	(t₀:t₀:T)[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)],
+	compare_sensitivity(v -> mf(echo_wave(R₁, v)(t₀:t₀:T))[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)], 0:100:1000, x -> amp2db.(abs.(x)))
+)
+savefig("fig/pulse_compression_wave_velocity_section_view_time_db.pdf")
+plot(
+	xlabel = L"t/\mathrm{s}",
+	ylabel = L"u(t, v)/\mathrm{dBV}",
+	label = hcat(0:100:1000 ...),
+	(t⁰:t⁰:T)[band(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰), 1 / 20)],
+	compare_sensitivity(v -> mf(echo_wave(R₁, v)(t⁰:t⁰:T), t⁰)[band(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰), 1 / 20)], 0:100:1000, x -> amp2db.(abs.(x)))
+)
+savefig("fig/pulse_compression_wave_velocity_section_view_time_enlargement_db.pdf")
 
 # double_mtd
+"signals and their sum"
+add(xss) = [xss; [sum(xss)]]
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{dBV}",
-	label = L"s(t)",
+	label = [L"|s_{11}^0(t)|" L"|s_1^0(t)|" L"s_{11}^0(t) + s_1^0(t)"],
+	(t⁰:t⁰:T)[band(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰), 1 / 20)],
+	add(
+		[
+			amp2db.(abs.(mf(1000 * echo_wave(1.1R₁, 1.1v₁)(t⁰:t⁰:T), t⁰)[band(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰), 1 / 20)])),
+			amp2db.(abs.(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰)[band(mf(echo_wave(R₁, v₁)(t⁰:t⁰:T), t⁰), 1 / 20)]))
+		]
+	)
 )
-savefig("fig/amplitude_distinguish_db.pdf")
+savefig("fig/amplitude_distance_distinguish_db.pdf")
 plot(
 	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	label = L"s(t)",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = [L"|s_{11}^0(t)|" L"|s_1^0(t)|" L"s_{11}^0(t) + s_1^0(t)"],
+	add(
+		[
+			amp2db.(view1(abs.(fft2(rearrange(mf(1000 * echo_wave(1.1R₁, 1.1v₁)(t₀:t₀:N * T))))))),
+			amp2db.(view1(abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))))))
+		]
+	)
 )
-savefig("fig/distance_distinguish.pdf")
+savefig("fig/amplitude_velocity_distinguish_db.pdf")
 plot(
 	xlabel = L"t/\mathrm{s}",
-	ylabel = L"u(t)/\mathrm{V}",
-	label = L"s(t)",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = [L"|s_2^0(t)|" L"|s_1^0(t)|" L"s_2^0(t) + s_1^0(t)"],
+	(t₀:t₀:T)[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)],
+	add(
+		[
+			amp2db.(abs.(mf(echo_wave(R₂, v₂)(t₀:t₀:T))[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)])),
+			amp2db.(abs.(mf(echo_wave(R₁, v₁)(t₀:t₀:T))[band(mf(echo_wave(R₁, v₁)(t₀:t₀:T)), 1 / 1000)]))
+		]
+	)
+)
+savefig("fig/distance_distinguish_db.pdf")
+plot(
+	xlabel = L"f/\mathrm{Hz}",
+	ylabel = L"u(t)/\mathrm{dBV}",
+	label = [L"|s_2^0(t)|" L"|s_1^0(t)|" L"s_2^0(t) + s_1^0(t)"],
+	range((f_d - prf) / 2, stop = (prf - f_d) / 2, step = f_d),
+	add(
+		[
+			amp2db.(view1(abs.(fft2(rearrange(mf(echo_wave(R₂, v₂)(t₀:t₀:N * T))))))),
+			amp2db.(view1(abs.(fft2(rearrange(mf(echo_wave(R₁, v₁)(t₀:t₀:N * T)))))))
+		]
+	)
 )
 savefig("fig/velocity_distinguish.pdf")
+
