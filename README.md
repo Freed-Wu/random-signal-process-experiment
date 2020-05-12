@@ -19,7 +19,7 @@ Install
 git clone git@github.com:Freed-Wu/random-signal-process-experiment.git
 cd random-signal-process-experiment
 julia lst/main.jl # generate figures, tables, reference.
-latexmk -pvc random-signal-process-experiment
+latexmk -pvc main.tex
 ```
 
 Thanks
