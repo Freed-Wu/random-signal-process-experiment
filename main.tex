@@ -11,14 +11,34 @@
   abstract-prefix = 课设论文,
   header-title = 本科课程设计说明书,
   supervisor = 顾红,
-  associate-supervisor = 顾红,
+  associate-supervisor = 杨建超,
   judge = 顾红,
 }
-\usepackage{nomencl}
+\usepackage[refpage]{nomencl}
 \makenomenclature%
+\renewcommand{\nomname}{术语}
+\renewcommand{\pagedeclaration}{，第1次出现在页~}
 \usepackage{minted}
+\setminted[julia]{%
+  breakanywhere,
+  breakanywheresymbolpre = {},
+  breaksymbolleft = {},
+  breaksymbolindentleftnchars = 0,
+}
 \usepackage{boxie}
 \usepackage{siunitx}
+\sisetup{mode = text}
+\usepackage{cases}
+\usepackage{csvsimple}
+\usepackage{booktabs}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{fvextra}
+\fvset{%
+  highlightcolor = {yellow!20, white},
+}
+\newtheorem{definition}{定义}
+\newtheorem{theorem}{定理}
 \begin{document}
 
 \maketitle
@@ -36,7 +56,7 @@
 \subfile{sub/simulate}
 
 \backmatter%
-\bibliography{bib/main}
+\bibliography{bib/CITATION}
 \subfile{sub/acknowledgement}
 
 \appendix

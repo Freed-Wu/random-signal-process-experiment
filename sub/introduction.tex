@@ -8,10 +8,10 @@
 \label{sec:problem}
 
 仿真线性调频脉冲雷达的信号处理。设线性调频带宽为\SI{10}{\MHz}，时宽为
-\SI{200}{\μs}，占空比10\%，雷达载频为\SI{10}{GHz}，输入噪声为高斯白噪声。目标
-模拟分单目标和双目标两种情况，目标回波输入信噪比可变（\SI{-40}{dB} $\sim$
-\SI{10}{dB}），目标速度可变（0 $\sim$ \SI{1000}{m/s}），目标距离可变（0
-$\sim$ \SI{10000}{m}），相干处理时间不小于\SI{100}{ms}。
+\SI{200}{\us}，占空比10\%，雷达载频为\SI{10}{\GHz}，输入噪声为高斯白噪声。目标
+模拟分单目标和双目标两种情况，目标回波输入信噪比可变（\SI{-40}{\dB} $\sim$
+\SI{10}{\dB}），目标速度可变（0 $\sim$ \SI{1000}{\m/\s}），目标距离可变（0
+$\sim$ \SI{10000}{\m}），相干处理时间不小于\SI{100}{\ms}。
 
 程序要参数化可设。
 
@@ -20,9 +20,9 @@ $\sim$ \SI{10000}{m}），相干处理时间不小于\SI{100}{ms}。
 \end{Exercise}
 
 \begin{Exercise}[label = ex:2]
-  仿真 LFM 信号单周期和周期自相关函数，说明第一旁瓣高度，\SI{4}{dB}输出脉冲宽
-  度，以及如何通过加窗来抑制 LFM 信号脉压旁瓣，列表说明不同窗函数抑制旁瓣时的
-  旁瓣大小和主瓣展宽的倍数；
+  仿真 LFM 信号单周期和周期自相关函数，说明第一旁瓣高度，\SI{4}{\dB}输出脉冲
+  宽度，以及如何通过加窗来抑制 LFM 信号脉压旁瓣，列表说明不同窗函数抑制旁瓣时
+  的旁瓣大小和主瓣展宽的倍数；
 \end{Exercise}
 
 \begin{Exercise}[label = ex:3]
@@ -40,7 +40,7 @@ $\sim$ \SI{10000}{m}），相干处理时间不小于\SI{100}{ms}。
 \begin{Exercise}[label = ex:4]
   双目标时，
   \begin{itemize}
-    \item 仿真出大目标旁瓣盖掩盖小目标的情况；
+    \item 仿真出大目标旁瓣掩盖小目标的情况；
     \item 仿真出距离分辨和速度分辨的情况。
   \end{itemize}
 \end{Exercise}
@@ -54,8 +54,9 @@ $\sim$ \SI{10000}{m}），相干处理时间不小于\SI{100}{ms}。
     信号带宽滤波，再计算噪声平均功率 $P_n$ ，计算复信号单周期发射期间的平均功
     率，再根据输入信噪比计算出信号的外加幅度值 $A$ ；
     \begin{align}
-      10\lg \frac{A^2P_s}{P_n} = & \mathrm{SNR}_\mathrm{i}\\
-      A = & \sqrt{10^{\frac{\mathrm{SNR}_\mathrm{i}}{10}}}\frac{P_n}{P_s}
+      10\lg \frac{A^2P_s}{P_n} = & \mathrm{SNR}_i\\
+      \label{eq:a}
+      A = & \sqrt{10^{\frac{\mathrm{SNR}_i}{10}}}\frac{P_n}{P_s}
     \end{align}
   \item 相位编码信号保证一个码元内有两个样点以上；
   \item 通过数据计算分析脉压输出和 MTD 输出的信噪比，建议信号和噪声分开输入
@@ -74,15 +75,15 @@ $\sim$ \SI{10000}{m}），相干处理时间不小于\SI{100}{ms}。
 \section{假设}%
 \label{sec:assumption}
 
-\begin{description}
-  \item[复噪声为标准高斯白信号]\label{it:noise}大数定律表明当噪声产生因素彼此
+\begin{enumerate}
+  \item\label{it:noise}复噪声为标准高斯白噪声。大数定律表明当噪声产生因素彼此
     独立且总数接近无穷时噪声收敛于正态分布。物理实验表明噪声近似平稳。
-  \item[可对信号做希尔波特变换]\label{it:hillbert}因此我们将研究对象选为实信
+  \item\label{it:hillbert}可对信号做希尔波特变换。因此我们将研究对象选为实信
     号做希尔波特复化后的复信号。希尔波特变换不具有实时性，现实环境不会采用。
-  \item[忽略相对论效应]\label{doppler}现实环境表明雷达观测对象速度远小于光速
+  \item\label{it:doppler}忽略相对论效应。现实环境表明雷达观测对象速度远小于光速
     。因此多普勒公式无需修正。
-  \item[雷达的收发转换时间为0]\label{it:time_switch}忽略不计。
-\end{description}
+  \item\label{it:time_switch}雷达的收发转换时间为0。忽略不计。
+\end{enumerate}
 
 \end{document}
 

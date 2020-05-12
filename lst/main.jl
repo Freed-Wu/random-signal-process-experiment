@@ -29,6 +29,8 @@ using DataFrames # table create
 using Shell # shell inject
 Shell.run("mkdir tab") # directory to save tables
 Shell.run("mkdir fig") # directory to save figures
+Shell.run("mkdir bib") # directory to save reference
+Shell.run("cp ~/.julia/packages/FFTW/qqcBj/CITATION.bib bib")
 
 # input
 B = 10e6 # band width
@@ -156,7 +158,7 @@ plot(
 		amp2db.(abs.(mf(s₀(0:t₀:T)))[band(mf(s₀(0:t₀:T)), 1 / 1000)])
 	]
 )
-savefig("fig/self_coherent_db.pdf")
+savefig("fig/self_coherent_band_db.pdf")
 plot(
 	xlabel = L"t/\mathrm{s}",
 	ylabel = L"u(t)/\mathrm{dBV}",
@@ -180,7 +182,7 @@ plot(
 		amp2db.(abs.(mf(s₀(0:t⁰:T), t⁰))[band(mf(s₀(0:t⁰:T), t⁰), 1 / 20)])
 	]
 )
-savefig("fig/self_coherent_band_hf_enlargement_db.pdf")
+savefig("fig/self_coherent_enlargement_hf_db.pdf")
 default_windows = [rect, cosine, hanning, hamming, lanczos, triang, bartlett, blackman]
 default_windows_label = ["rect" "cosine" "hanning" "hamming" "lanczos" "triang" "bartlett" "blackman"]
 "add window for 1 element function"
@@ -202,7 +204,7 @@ plot(
 	label = default_windows_label,
 	mf_windows
 )
-savefig("fig/self_coherent_window_band_hf_enlargement_db.pdf")
+savefig("fig/self_coherent_window_enlargement_hf_db.pdf")
 mf_fft_windows = compare_window(abs.(mf(s₀(0:t⁰:T), t⁰)), x -> amp2db.(abs.(fft1(x))))
 plot(
 	xlabel = L"f/\mathrm{Hz}",
@@ -211,7 +213,7 @@ plot(
 	range(-f⁰ / 2, stop = f⁰ / 2, length = length(mf_fft_windows[1])),
 	mf_fft_windows
 )
-savefig("fig/self_coherent_window_fft_hf_enlargement_db.pdf")
+savefig("fig/self_coherent_window_fft_hf_db.pdf")
 "get index of local minimum"
 arglocalmin(xs) = findall(diff(sign.(diff(xs))) .> 0) .+ 1
 "get index of main lobe"
@@ -239,10 +241,10 @@ Shell.run("touch tab/self_coherent_window.csv")
 CSV.write(
 	"tab/self_coherent_window.csv",
 	DataFrame(
-		窗函数 = default_windows_label,
-		输出脉冲4dB宽度（s） = main_lobe_width.(mf_windows, 4) .* t⁰,
-		旁瓣高度（dBVs） = side_lobe_height.(mf_fft_windows),
-		主瓣宽度(Hz) = mf_fft_windows_main_lobe,
+		窗函数 = default_windows_label[1,:],
+		输出脉冲4dB宽度 = main_lobe_width.(mf_windows, 4) .* t⁰,
+		旁瓣高度 = side_lobe_height.(mf_fft_windows),
+		主瓣宽度 = mf_fft_windows_main_lobe,
 		主瓣宽度展开倍数 = mf_fft_windows_main_lobe ./ mf_fft_windows_main_lobe[1]
 	)
 )
@@ -265,7 +267,7 @@ Shell.run("touch tab/parameter.csv")
 CSV.write(
 	"tab/parameter.csv",
 	DataFrame(
-		物理量 = ["不模糊距离", "不模糊速度", "距离分辩率", "速度分辩率"],
+		物理量 = ["不模糊距离", "不模糊速度", "距离分辨率", "速度分辨率"],
 		数值 = abs.([t2r(T), f2v(prf), ΔR, Δv])
 	)
 )

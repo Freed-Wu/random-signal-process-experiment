@@ -7,15 +7,23 @@
 \section{发射信号}%
 \label{sec:emit}
 
-为了获取有确定信噪比的发射信号，我们要先获得噪声波形振幅的均值。根据假设%
-~\ref{it:noise}，噪声$n(t)$\nomenclature{$n(t)$}{噪声}分布见式~\ref{eq:noise}
-和图~\ref{fig:noise_pdf}。
+\subsection{噪声}%
+\label{sub:noise}
 
-\begin{align}
-  \label{eq:noise}
-  n(t) \sim & N(0, 1)\\
-  n(t) \in & \mathbb{C}
-\end{align}
+为了获取有确定信噪比的发射信号，我们要先获得噪声波形振幅的均值。根据假设%
+~\ref{it:noise}和定义~\ref{def:noise}，噪声$n(t)$\nomenclature{$n(t)$}{噪声}
+分布见图~\ref{fig:noise_pdf}。
+
+\begin{definition}[标准高斯复白噪声]%
+  \label{def:noise}
+  满足式~\ref{eq:noise}的信号$n(t)$。
+\end{definition}
+
+\begin{subnumcases}{\label{eq:noise}}%
+  n(t) \sim N(0, 1)\\
+  n(t) \in \mathbb{C}\\
+  \mathrm{E}n(t)n(t + \tau) = \delta(\tau)
+\end{subnumcases}
 
 \begin{figure}[htbp]
   \centering
@@ -26,56 +34,54 @@
   \label{fig:noise_pdf}
 \end{figure}
 
-根据假设~\ref{it:hillbert}，发射的基带波形$s_0(t)$\nomenclature{$s_0(t)$}{发
-射的基带波形}见式~\ref{eq:baseband_wave}和图~\ref{fig:baseband_wave}。其中
-$\alpha$\nomenclature{$\alpha$}{角加频率}是角加频率，$k$\nomenclature{$k$}{角
-频率}是角频率，$\tau$\nomenclature{$\tau$}{时宽}是时宽，
-$B$\nomenclature{$B$}{带宽}是带宽，
-$T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复周期。
+\subsection{基带信号}%
+\label{sub:baseband}
+
+根据假设~\ref{it:hillbert}和定义~\ref{def:lfm}，发射的基带波形
+$s_0(t)$\nomenclature{$s_0(t)$}{发射的基带波形}见图~\ref{fig:baseband}。发射
+的基带频谱$S_0(f)$\nomenclature{$S_0(f)$}{发射的基带频谱}见图%
+~\ref{fig:baseband_spectrum}。
+
+\begin{definition}[线性调频复信号]%
+  \label{def:lfm}
+  满足式~\ref{eq:baseband_wave}的信号$s_0(t)$。其中
+  $\alpha$\nomenclature{$\alpha$}{角加频率}是角加频率，
+  $k$\nomenclature{$k$}{加频率}是加频率，$\tau$\nomenclature{$\tau$}{时宽}是时
+  宽，$B$\nomenclature{$B$}{带宽}是带宽，
+  $T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复周期，
+  $A$\nomenclature{$A$}{振幅}是根据式~\ref{eq:a}得到的振幅。
+\end{definition}
 
 \begin{align}
   \label{eq:baseband_wave}
-  s_0(t) = & \exp{\jmath\frac{\alpha t^2}{2}} \rect{t\%T / \tau +
-  \frac{1}{2}}\\
+  s_0(t) = & A\exp{\jmath\frac{\alpha t^2}{2}}
+  \mathrm{rect}\left(\frac{t\%T_\mathrm{r}}{\tau} + \frac{1}{2}\right)\\
   \alpha = & 2\pi k\\
   k = & \frac{B}{\tau}
 \end{align}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/baseband_wave}
-  \caption{基带波形}%
-  \label{fig:baseband_wave}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/baseband_wave}
+    \caption{基带波形}%
+    \label{fig:baseband_wave}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/baseband_wave_band}
+    \caption{基带波形通带}%
+    \label{fig:baseband_wave_band}
+  \end{subfigure}
+  \caption{基带信号}%
+  \label{fig:baseband}
 \end{figure}
-
-根据假设~\ref{it:doppler}和假设~\ref{it:time_switch}，有式~\ref{eq:doppler}。
-其中
-
-\begin{align}
-  \label{eq:doppler}
-  \max{R} = & \frac{cT_\mathrm{r}}{2}\\
-  \max{v} = & \frac{\lambda f_\mathrm{r}\varparallel 2c}{2}\\
-  \min{R} = & \frac{c\tau}{2}\\
-  \min{v} = & \frac{\lambda f_d\varparallel 2c}{2}\\
-  f_\mathrm{r} = & \frac{1}{T_\mathrm{r}}\\
-  \lambda = & \frac{c}{f_\mathrm{c}}
-\end{align}
-
-发射的基带波形通带见图~\ref{fig:baseband_wave_band}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/baseband_wave_band}
-  \caption{基带波形通带}%
-  \label{fig:baseband_wave_band}
-\end{figure}
-
-发射的基带频谱$S_(f)$\nomenclature{$S_(f)$}{发射的基带频谱}见图%
-~\ref{fig:baseband_spectrum}。
 
 \begin{figure}[htbp]
   \centering
@@ -86,18 +92,76 @@ $T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复�
   \label{fig:baseband_spectrum}
 \end{figure}
 
+根据假设~\ref{it:doppler},~\ref{it:time_switch}和定理%
+~\ref{th:max_r},~\ref{th:max_v},~\ref{th:min_r},~\ref{th:min_v}，
+问题~\ref{ex:1}可解。
+
+\begin{theorem}[不模糊距离]%
+  \label{th:max_r}
+  不模糊且可分辨的最大距离$\max{R}$\nomenclature{$R$}{雷达可测距离}由
+  式~\ref{eq:max_r}决定。其中$c$\nomenclature{$c$}{光速}是光速。
+\end{theorem}
+
+\begin{theorem}[不模糊速度]%
+  \label{th:max_v}
+  不模糊且可分辨的最大速度由$\max{v}$\nomenclature{$v$}{雷达可测速度}
+  式~\ref{eq:max_v}决定。其中$\lambda$\nomenclature{$\lambda$}{波长}是波长，
+  $f_\mathrm{r}$\nomenclature{$f_\mathrm{r}$}{脉冲重复频率}是脉冲重复频率。
+\end{theorem}
+
+\begin{theorem}[距离分辨力]%
+  \label{th:min_r}
+  不模糊且可分辨的最大距离由式~\ref{eq:min_r}决定。
+\end{theorem}
+
+\begin{theorem}[速度分辨力]%
+  \label{th:min_v}
+  不模糊且可分辨的最大速度由式~\ref{eq:min_v}决定。其中
+  $f_\mathrm{d}$\nomenclature{$f_\mathrm{d}$}{相干处理频率}是相干处理频率。
+  $t_\mathrm{d}$\nomenclature{$t_\mathrm{d}$}{相干处理时间}是相干处理时间。
+\end{theorem}
+
+\begin{align}
+  \label{eq:max_r}
+  \max{R} = & \frac{cT_\mathrm{r}}{2}\\
+  \label{eq:max_v}
+  \max{v} = & \frac{\lambda f_\mathrm{r}\varparallel 2c}{2}\\
+  \label{eq:min_r}
+  \min{R} = & \frac{c}{2B}\\
+  \label{eq:min_v}
+  \min{v} = & \frac{\lambda f_\mathrm{d}\varparallel 2c}{2}\\
+  f_\mathrm{r} = & \frac{1}{T_\mathrm{r}}\\
+  \lambda = & \frac{c}{f_\mathrm{c}}\\
+  f_\mathrm{d} = & \frac{1}{T_\mathrm{d}}
+\end{align}
+
 \begin{Answer}[ref = ex:1]
-  不模糊距离为，不模糊速度为，距离分辨力为，速度分辨力为。
+  不模糊距离、不模糊速度、距离分辨力、速度分辨力见表~\ref{tab:parameter}。
 \end{Answer}
+
+\begin{table}[htbp]
+  \centering
+  \caption{参数}%
+  \label{tab:parameter}
+  \csvautobooktabular{tab/parameter.csv}
+\end{table}
 
 \section{自相关函数}%
 \label{sec:self_coherent}
 
-根据式\ref{eq:mf_wave}，匹配滤波器冲激响应波形$h(t)$\nomenclature{$h(t)$}{匹
-配滤波器冲激响应}见图~\ref{fig:mf_wave}。
+\subsection{发射的基带脉冲压缩信号}%
+\label{sub:self_coherent}
+
+根据定理~\ref{th:match_filter}匹配滤波器冲激响应波形
+$h(t)$\nomenclature{$h(t)$}{匹配滤波器冲激响应}见图~\ref{fig:mf_wave}。
+
+\begin{theorem}[匹配滤波器]%
+  \label{th:match_filter}
+  能够使输出信噪比最大的滤波器冲激响应波形$h(t)$满足式\ref{eq:match_filter}。
+\end{theorem}
 
 \begin{align}
-  \label{eq:mf_wave}
+  \label{eq:match_filter}
   h(t) = s_0^*(\frac{T + \tau}{2} - t)
 \end{align}
 
@@ -110,126 +174,181 @@ $T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复�
   \label{fig:mf_wave}
 \end{figure}
 
-根据式\ref{eq:self_coherent_wave}，发射的基带信号的脉压波形与其自相关函数相似
-。发射的基带信号的脉压波形见图~\ref{fig:self_coherent_wave}。
+发射的基带自相关函数$R_{s_0}(t)$\nomenclature{$R_{s_0}(t)$}{发射的基带自相关
+函数}是非因果信号。但根据定理~\ref{th:self_coherent}和
+定义~\ref{def:pulse_compression}，可以用发射的基带脉冲压缩信号代替基带自相关
+函数$R_{s_0}(t)$。发射的基带脉压波形$s_0^0(t)$\nomenclature{$s_0^0(t)$}{发射
+的基带脉压波形}见图~\ref{fig:self_coherent}。
+
+\begin{definition}[脉冲压缩信号]%
+  \label{def:pulse_compression}
+  满足式~\ref{eq:pulse_compression}的信号$s^0(t)$。
+\end{definition}
+
+\begin{align}
+  \label{eq:pulse_compression}
+  s^0(t) = s(t) * h(t)
+\end{align}
+
+\begin{theorem}[发射的基带自相关函数与发射的基带脉冲压缩信号的关系]%
+  \label{th:self_coherent}
+  根据式~\ref{eq:self_coherent_wave}，发射的基带自相关函数与发射的基带脉冲压
+  缩信号的波形相同。
+\end{theorem}
 
 \begin{align}
   \label{eq:self_coherent_wave}
-  R_s(t) = & s_0(t) * s_0^*(-t)\\
-  s_0^0(t) = & s_0(t) * s^0(t)
+  R_{s_0}(t) = & s_0(t) * s_0^*(-t)\\
+  s_0^0(t) = & s_0(t) * h(t)
 \end{align}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/self_coherent_wave}
-  \caption{发射的基带信号的脉压波形}%
-  \label{fig:self_coherent_wave}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_wave}
+    \caption{发射的基带脉压波形}%
+    \label{fig:self_coherent_wave}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_band}
+    \caption{发射的基带信号的脉压波形通带}%
+    \label{fig:self_coherent_band}
+  \end{subfigure}
+  \caption{发射的基带脉压信号}%
+  \label{fig:self_coherent}
 \end{figure}
 
-发射的基带信号的脉压波形通带见图~\ref{fig:self_coherent_wave}。
+发射的基带脉压波形波特图见图~\ref{fig:self_coherent_db}。将采样频率增大到最低
+不失真采样频率的10倍，发射的基带脉压波形通带局部放大波特图见
+图~\ref{fig:self_coherent_enlargement_hf_db}。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_band_db}
+    \caption{发射的基带脉压波形通带波特图}%
+    \label{fig:self_coherent_band_db}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_enlargement_db}
+    \caption{发射的基带脉压波形局部放大波特图}%
+    \label{fig:self_coherent_enlargement_db}
+  \end{subfigure}
+  \caption{发射的基带脉压波形波特图}%
+  \label{fig:self_coherent_db}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[
     width = 0.8\linewidth,
-  ]{fig/self_coherent_band}
-  \caption{发射的基带信号的脉压波形通带}%
-  \label{fig:self_coherent_band}
+  ]{fig/self_coherent_enlargement_hf_db}
+  \caption{发射的基带脉压波形高采样率局部放大波特图}%
+  \label{fig:self_coherent_enlargement_hf_db}
 \end{figure}
 
-发射的基带信号的脉压波形通带波特图见图~\ref{fig:self_coherent_wave}。
+\subsection{发射的基带脉冲压缩信号加窗}%
+\label{sub:self_coherent_window}
+
+发射的基带脉压波形加窗高采样率波特图见图~\ref{fig:self_coherent_window_hf_db}
+。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/self_coherent_band_db}
-  \caption{发射的基带信号的脉压波形通带波特图}%
-  \label{fig:self_coherent_band_db}
-\end{figure}
-
-发射的基带信号的脉压波形通带局部放大波特图见图%
-~\ref{fig:self_coherent_band_enlargement_db}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/self_coherent_band_enlargement_db}
-  \caption{发射的基带信号的脉压波形通带局部放大波特图}%
-  \label{fig:self_coherent_band_enlargement_db}
-\end{figure}
-
-发射的基带信号的脉压波形高采样率通带局部放大波特图见图%
-~\ref{fig:self_coherent_hf_band_enlargement_db}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/self_coherent_band_enlargement_hf_db}
-  \caption{发射的基带信号的脉压波形高采样率通带局部放大波特图}%
-  \label{fig:self_coherent_hf_band_enlargement_db}
-\end{figure}
-
-发射的基带信号的脉压波形加窗高采样率通带局部放大波特图见图%
-~\ref{fig:self_coherent_window_hf_enlargement_db}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/self_coherent_window_hf_enlargement_db}
-  \caption{自相关函数加窗高采样率局部放大波特图}%
-  \label{fig:self_coherent_window_hf_enlargement_db}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_window_enlargement_hf_db}
+    \caption{自相关函数加窗高采样率局部放大波特图}%
+    \label{fig:self_coherent_window_enlargement_hf_db}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/self_coherent_window_fft_hf_db}
+    \caption{自相关函数加窗高采样率频谱波特图}%
+    \label{fig:self_coherent_window_fft_hf_db}
+  \end{subfigure}
+  \caption{自相关函数加窗高采样率波特图}%
+  \label{fig:self_coherent_window_hf_db}
 \end{figure}
 
 \begin{Answer}[ref = ex:2]
-  第一旁瓣高度为，\SI{4}{\dB}输出脉冲宽度为，不同窗函数抑制旁瓣时的旁瓣大小和
-  主瓣展宽的倍数见表~\ref{tab:window}。
+  不同窗函数时的第一旁瓣高度、\SI{4}{\dB}输出脉冲宽度、主瓣展宽的倍数见
+  表~\ref{tab:self_coherent_window}。
 \end{Answer}
 
 \begin{table}[htbp]
   \centering
   \caption{不同窗函数抑制旁瓣时的旁瓣大小和主瓣展宽的倍数}%
-  \label{tab:window}
-  \csvautobooktabular{tab/window.csv}
+  \label{tab:self_coherent_window}
+  \scriptsize
+  \csvautobooktabular{tab/self_coherent_window.csv}
 \end{table}
 
 \section{单目标动目标检测}%
 \label{sec:single_mtd}
 
-根据式~\ref{eq:echo_wave_wave}，回波波形$s_1(t)$\nomenclature{$s_1(t)$}{回波
-波形}见图~\ref{fig:echo_wave_wave}。
+\subsection{回波信号}%
+\label{sub:echo}
+
+根据式\ref{th:echo_wave}，回波波形$s_1(t)$\nomenclature{$s_1(t)$}{回波波形}、
+频谱$S_1(t)$\nomenclature{$S_1(f)$}{回波频谱}见图~\ref{fig:echo}。
+
+\begin{theorem}[多普勒效应]%
+  \label{th:echo_wave}
+  回波波形$s_1(t)$满足式~\ref{eq:echo_wave}，其中
+  $f_\mathrm{v}(v)$\nomenclature{$f_\mathrm{v}(v)$}{多普勒频移}为多普勒频移。
+  取以雷达为原点的矢径$R$正方向为速度$v$正方向。取频率增加为多普勒频移
+  $f_\mathrm{v}(v)$的正方向。
+\end{theorem}
 
 \begin{align}
-  s_1(t) = s_0(t)\exp{\jmath 2\pi f_\mathrm{d}t}
+  \label{eq:echo_wave}
+  s_1(t) = & s_0(t)\exp{\jmath 2\pi f_\mathrm{v}(v)t}\\
+  f_\mathrm{v}(v) = & -\frac{2v}{\lambda}\frac{c}{c - v}
 \end{align}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/echo_wave_wave}
-  \caption{回波波形}%
-  \label{fig:echo_wave_wave}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/echo_wave}
+    \caption{回波波形}%
+    \label{fig:echo_wave}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/echo_spectrum}
+    \caption{回波频谱}%
+  \end{subfigure}
+  \caption{回波信号}%
+  \label{fig:echo}
 \end{figure}
 
-回波频谱$S_1(t)$\nomenclature{$S_1(f)$}{回波频谱}见图%
-~\ref{fig:echo_wave_spectrum}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/echo_wave_spectrum}
-  \caption{回波频谱}%
-  \label{fig:echo_wave_spectrum}
-\end{figure}
-
-脉压波形$s_1^0(t)$\nomenclature{脉压波形}{脉压波形}见图%
+脉压波形$s_1^0(t)$\nomenclature{$s_1^0(t)$}{脉压波形}见图%
 ~\ref{fig:pulse_compression_wave}。
 
 \begin{figure}[htbp]
@@ -241,116 +360,204 @@ $T_\mathrm{r}$\nomenclature{$T_\mathrm{r}$}{脉冲重复周期}是脉冲重复�
   \label{fig:pulse_compression_wave}
 \end{figure}
 
-多个回波波形$s_1(t)$见图~\ref{fig:echo_wave_wave2}。
+\subsection{动目标检测}%
+\label{sub:mtd}
+
+根据定义~\ref{def:mtd}，动目标检测波形$s_1^0(t, n)$\nomenclature{$s_1^0(t,
+n)$}{动目标检测波形}及其慢时间频谱$S_1^0(t, F)$\nomenclature{$S_1(t, F)$}{动
+目标检测慢时间频谱}见图~\ref{fig:mtd}。
+
+\begin{definition}[动目标检测信号]%
+  \label{def:mtd}
+  满足式~\ref{eq:mtd}的信号$s_1^0(t, n)$，其中$t$是快时间，$n$是慢时间。
+\end{definition}
+
+\begin{align}
+  \label{eq:mtd}
+  s_1^0(t, n) = & s_1^0(t + nT_\mathrm{r})\\
+  t \in & \left[0, T_\mathrm{r}\right)\\
+  n \in & \mathbb{N}
+\end{align}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/mtd_wave}
+    \caption{动目标检测波形}%
+    \label{fig:mtd_wave}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/mtd_slow_spectrum}
+    \caption{动目标检测慢时间频谱}%
+    \label{fig:mtd_slow_spectrum}
+  \end{subfigure}
+  \caption{动目标检测}%
+  \label{fig:mtd}
+\end{figure}
+
+动目标检测慢时间频谱慢时间视图$\max\limits_{t}S_1^0(t, F)$及其波特图见
+图~\ref{fig:mtd_slow_spectrum_slow_view_and_db}。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/mtd_slow_spectrum_slow_view}
+    \caption{动目标检测慢时间频谱慢时间视图}%
+    \label{fig:mtd_slow_spectrum_slow_view}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/mtd_slow_spectrum_slow_view_db}
+    \caption{动目标检测慢时间频谱慢时间视图波特图}%
+    \label{fig:mtd_slow_spectrum_slow_view_db}
+  \end{subfigure}
+  \caption{动目标检测慢时间频谱慢时间视图及其波特图}%
+  \label{fig:mtd_slow_spectrum_slow_view_and_db}
+\end{figure}
+
+动目标检测加窗慢时间频谱慢时间视图波特图$\max\limits_{t}S_1^0(t, F)$见
+图~\ref{fig:mtd_slow_spectrum_slow_view_and_db}。
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[
     width = 0.8\linewidth,
-  ]{fig/echo_wave_wave2}
-  \caption{多个回波波形}%
-  \label{fig:echo_wave_wave2}
+  ]{fig/mtd_window_slow_spectrum_slow_view_db}
+  \caption{动目标检测加窗慢时间频谱慢时间视图波特图}%
+  \label{fig:mtd_window_slow_spectrum_slow_view_db}
 \end{figure}
 
-动目标检测波形$s_1(t, n)$见图~\ref{fig:mtd_wave}。
+\subsection{多普勒敏感}%
+\label{sub:doppler_sensitivity}
+
+根据定义~\ref{def:doppler_sensitivity}，脉压波形与速度的关系波特图见
+图~\ref{fig:pulse_compression_wave_velocity_db}。脉压波形与速度的关系剖视图波
+特图见图~\ref{fig:doppler_sensitivity}。
+
+\begin{definition}[多普勒敏感]%
+  \label{def:doppler_sensitivity}
+  脉压波形与速度的关系$s_1^0(t, v)$。
+\end{definition}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[
     width = 0.8\linewidth,
-  ]{fig/mtd_wave}
-  \caption{动目标检测波形}%
-  \label{fig:mtd_wave}
+  ]{fig/pulse_compression_wave_velocity_db}
+  \caption{脉压波形与速度的关系波特图}%
+  \label{fig:pulse_compression_wave_velocity_db}
 \end{figure}
-
-动目标检测波形慢时间视图$\max\limits_t{s_1(t, n)}$见图%
-~\ref{fig:mtd_wave_slow_view}。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/mtd_wave_slow_view}
-  \caption{动目标检测波形慢时间视图}%
-  \label{fig:mtd_wave_slow_view}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/pulse_compression_wave_velocity_section_view_time_db}
+    \caption{脉压波形与速度的关系时间剖视图波特图}%
+    \label{fig:pulse_compression_wave_velocity_section_view_time_db}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/pulse_compression_wave_velocity_section_view_time_enlargement_db}
+    \caption{脉压波形与速度的关系时间剖视图波特图局部放大图}%
+    \label{fig:pulse_compression_wave_velocity_section_view_time_enlargement_db}
+  \end{subfigure}
+    \caption{多普勒敏感}%
+    \label{fig:doppler_sensitivity}
 \end{figure}
 
-动目标检测慢时间频谱$S_1(t, F)$见图~\ref{fig:mtd_slow_spectrum}。
+根据定义~\ref{def:doppler_tolerance}，只要给出脉压增益最低许可容限即可求出多
+普勒容限。
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/mtd_slow_spectrum}
-  \caption{动目标检测慢时间频谱}%
-  \label{fig:mtd_slow_spectrum}
-\end{figure}
-
-动目标检测慢时间频谱慢时间视图$\max\limits_tS_1(t, F)$见图%
-~\ref{fig:mtd_slow_spectrum}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/mtd_slow_spectrum_slow_view}
-  \caption{动目标检测慢时间频谱慢时间视图}%
-  \label{fig:mtd_slow_spectrum_slow_view}
-\end{figure}
-
-动目标检测慢时间频谱慢时间视图波特图$\max\limits_FS_1(t, F)$见图%
-~\ref{fig:mtd_slow_spectrum}。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/mtd_slow_spectrum_slow_view_db}
-  \caption{动目标检测慢时间频谱慢时间视图波特图}%
-  \label{fig:mtd_slow_spectrum_slow_view_db}
-\end{figure}
+\begin{definition}[多普勒容限]%
+  \label{def:doppler_tolerance}
+  脉压增益降低到最低许可容限时的多普勒频移。
+\end{definition}
 
 \begin{Answer}[ref = ex:3]
-  脉冲压缩信噪比增益为， FFT 信噪比增益为，时宽为，带宽为，多卜勒敏感现象及其
-  性能损失见表~\ref{tab:doppler}
+  脉冲压缩信噪比增益、 FFT 信噪比增益、时宽、带宽见表~\ref{tab:measure}。多卜
+  勒敏感现象及其性能损失见图~\ref{fig:doppler_sensitivity}。
 \end{Answer}
+
+\begin{table}[htbp]
+  \centering
+  \caption{测量结果}%
+  \label{tab:measure}
+  \csvautobooktabular{tab/measure.csv}
+\end{table}
 
 \section{双目标动目标检测}%
 \label{sec:double_mtd}
 
 \begin{Answer}[ref = ex:4]
   \begin{itemize}
-    \item 大目标旁瓣盖掩盖小目标见图~\ref{fig:amplitude_distinguish_db}；
-    \item 距离分辨见图~\ref{fig:distance_distinguish}；
-    \item 速度分辨见图~\ref{fig:velocity_distinguish}。
+    \item 大目标旁瓣掩盖小目标见图~\ref{fig:amplitude_distinguish_db}；
+    \item 距离、速度分辨的临界情况见图~\ref{fig:distinguish}。
   \end{itemize}
 \end{Answer}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/power_distinguish}
-  \caption{大目标旁瓣盖掩盖小目标}%
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+    width = \linewidth,
+    ]{fig/amplitude_distance_distinguish_db}
+    \caption{大目标旁瓣掩盖小目标（距离）}%
+    \label{fig:amplitude_distance_distinguish_db}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/amplitude_velocity_distinguish_db}
+    \caption{大目标旁瓣掩盖小目标（速度）}%
+    \label{fig:amplitude_velocity_distinguish_db}
+  \end{subfigure}
+  \caption{大目标旁瓣掩盖小目标}%
   \label{fig:amplitude_distinguish_db}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/distance_distinguish}
-  \caption{距离分辨}%
-  \label{fig:distance_distinguish}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[
-    width = 0.8\linewidth,
-  ]{fig/velocity_distinguish}
-  \caption{速度分辨}%
-  \label{fig:velocity_distinguish}
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/distance_distinguish_db}
+    \caption{距离分辨临界情况}%
+    \label{fig:distance_distinguish_db}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[htbp]{0.45\linewidth}
+    \centering
+    \includegraphics[
+      width = \linewidth,
+    ]{fig/velocity_distinguish}
+    \caption{速度分辨临界情况}%
+    \label{fig:velocity_distinguish}
+  \end{subfigure}
+  \caption{分辨临界情况}%
+  \label{fig:distinguish}
 \end{figure}
 
 \end{document}

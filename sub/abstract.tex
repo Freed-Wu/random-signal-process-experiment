@@ -2,19 +2,74 @@
 \begin{document}
 
 \begin{abstract}
-    线性调频 (LFM)技术在雷达、声纳技术中有广泛应用。本文针对题目要求，使
-    用 Octave 设计了一个参数可调的线性调频脉冲雷达仿真系统。
+  线性调频 (LFM)技术在雷达、声纳技术中有广泛应用。本文针对题目要求，使
+  用\href{https://github.com/JuliaLang/julia}{Julia}设计了一个参数可调的线性
+  调频脉冲雷达仿真系统。\cite{FFTW.jl-2005}
 
-    先分析该雷达的不模糊距离和速度，距离和速度分辨率；
-  \cite{李云冲2007雷达仿真系统的设计,王洪锋2002雷达仿真平台的设计,张敏2006通用雷达仿真系统模型的研究与探讨}
+  针对问题~\ref{ex:1}，计算得到该雷达的不模糊距离和速度，距离和速度分辨率；
+
+  针对问题~\ref{ex:2}，仿真了 LFM 信号的自相关函数，并对脉压信号进行了加窗，
+  比较了不同窗函数对旁瓣高度，主瓣宽度，\SI{4}{\dB}脉冲宽度的影响；
+
+  针对问题~\ref{ex:3}，仿真了单目标时的脉压，动目标检测，多普勒敏感的情况。将
+  实验的结果与理论比较，并计算了误差；
+
+  针对问题~\ref{ex:4}，仿真出大目标旁瓣盖掩盖小目标、距离和速度刚好
+  无法分辨的情况。
+
+  最后列出了程序运行的时间和对内存的消耗等指标。此外，本程序具有2个特点：
+
+  \begin{description}
+    \item[全自动]只需运行此程序即会自动得到结果，无需截图，无需
+      复制粘贴，程序会自己新建文件夹，自己计算结果，并将运行后得到的图片和表
+      格保存到文件夹下。完全无需人手动操作；
+    \item[参数可调]真正意义的参数可调。程序主体采用函数式编程，除了一开
+      始输入的参数外，不依赖任何外来参数。所以只修改一开始输入的参数，即可
+      正确运行。
+  \end{description} 
   \begin{keyword}
-    线性调频脉冲雷达
+    线性调频脉冲雷达，动目标检测，多普勒敏感
   \end{keyword}
 \end{abstract}
 
 \begin{abstract*}
+  LFM technology is widely used in radar and sonar technology. In this paper,
+  a simulation system of LFM pulse radar with adjustable parameters is
+  designed by \href{https://github.com/JuliaLang/julia}{Julia}.
+
+  In order to solve Problem~\ref{ex:1}, the range and velocity resolution are calculated;
+
+  Aiming at Problem~\ref{ex:2}, the autocorrelation function of LFM signal is
+  simulated, and the pulse pressure signal is windowed. The effects of
+  different window functions on the side lobe height, main lobe width, and
+  the pulse width of \SI{4}{\dB} are compared;
+
+  Aiming at Problem~\ref{ex:3}, the pulse pressure, moving target detection
+  and Doppler sensitivity of single target are simulated. The experimental
+  results are compared with the theoretical results, and the errors are
+  calculated;
+
+  In order to solve Problem~\ref{ex:4}, it is simulated that the sidelobe
+  cover of a large target can cover a small target, and the distance and
+  speed are just indistinguishable.
+
+  Finally, the running time of the program and the consumption of memory are
+  listed. In addition, the program has two characteristics:
+
+  \begin{description}
+    \item[fully automatic]Just run this program to get the results
+      automatically, without screenshots, copying and pasting. The program
+      will create a new folder by itself, calculate the results by itself,
+      and save the pictures and tables obtained after running to the folder.
+      No manual operation is required at all;
+    \item[parameter adjustable] the real parameter is adjustable. The main
+      body of the program adopts functional programming, which does not
+      depend on any foreign parameters except the parameters input at the
+      beginning. Therefore, only the parameters entered at the beginning can
+      be modified to run correctly.
+  \end{description} 
   \begin{keyword*}
-    LFM Pulse Radar
+    LFM Pulse Radar, Moving target detection, Doppler sensitive
   \end{keyword*}
 \end{abstract*}
 
